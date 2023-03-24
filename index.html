@@ -103,6 +103,7 @@
     }
 
     function FunctionUserComponent(props) {
+      const currentUserId = React.useContext(CurrentUserIdContext);
       const [user, dispatch] = React.useReducer(userReducer, {});
 
       function setUser(userData) {
@@ -121,7 +122,11 @@
 
       React.useEffect(fetchUserAndUpdateState, [props.userId]);
 
-      return <UserForm onSubmit={handleUpdate} user={user} />;
+      if (currentUserId === user.id) {
+        return <UserForm onSubmit={handleUpdate} user={user} />;
+      } else {
+        return <p>This is not your user profile. You can't make other people change!</p>;
+      }
     }
 
     class ClassUserComponent extends React.Component {
@@ -170,12 +175,16 @@
     const store = Redux.createStore(userReducer);
 
     const userId = 1;
+    const currentUserId = 1;
+    const CurrentUserIdContext = React.createContext();
 
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(
       <React.Fragment>
         <h1>FunctionUserComponent</h1>
-        <FunctionUserComponent userId={userId} />
+        <CurrentUserIdContext.Provider value={currentUserId}>
+          <FunctionUserComponent userId={userId} />
+        </CurrentUserIdContext.Provider>
 
         <h1>UserContainer</h1>
         <ReactRedux.Provider store={store}>
