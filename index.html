@@ -91,8 +91,21 @@
       })
     }
 
+    function userReducer(state = {}, action) {
+      switch (action.type) {
+        case 'set_user':
+          return Object.assign({}, state, action.payload);
+        default:
+          return state;
+      }
+    }
+
     function FunctionUserComponent(props) {
-      const [user, setUser] = React.useState({});
+      const [user, dispatch] = React.useReducer(userReducer, {});
+
+      function setUser(userData) {
+        dispatch({ type: 'set_user', payload: userData });
+      }
 
       function fetchUserAndUpdateState() {
         const controller = new AbortController();
