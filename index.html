@@ -82,6 +82,15 @@
       })
     }
 
+    function updateUser (userId, userData) {
+      return fetch(`http://localhost:3000/users/${userId}`, {
+        method: 'PUT',
+        body: JSON.stringify(userData)
+      }).then(function (response) {
+        return response.json();
+      })
+    }
+
     function FunctionUserComponent(props) {
       const [user, setUser] = React.useState({});
 
@@ -91,16 +100,13 @@
         return controller.abort;
       }
 
-      // runs when props.userId changes
+      function handleUpdate(userData) {
+        updateUser(props.userId, userData).then(setUser);
+      }
+
       React.useEffect(fetchUserAndUpdateState, [props.userId]);
 
-      // Runs only on first render
-      // React.useEffect(fetchUserAndUpdateState, []);
-
-      // Runs every render
-      // React.useEffect(fetchUserAndUpdateState);
-
-      return <UserForm user={user} />;
+      return <UserForm onSubmit={handleUpdate} user={user} />;
     }
 
     class ClassUserComponent extends React.Component {
@@ -108,6 +114,7 @@
         super(props);
         this.state = {};
         this.controller = new AbortController();
+        this.handleUpdate = this.handleUpdate.bind(this);
       }
 
       componentDidMount() {
@@ -119,8 +126,13 @@
         this.controller.abort();
       }
 
+      handleUpdate(userData) {
+        updateUser(this.props.userId, userData)
+          .then(user => this.setState(user));
+      }
+
       render() {
-        return <UserForm user={this.state} />;
+        return <UserForm onSubmit={this.handleUpdate} user={this.state} />;
       }
     }
 
