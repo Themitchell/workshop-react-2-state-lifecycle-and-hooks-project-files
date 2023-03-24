@@ -73,9 +73,33 @@
       );
     }
 
+    function FunctionUserComponent(props) {
+      const [user, setUser] = React.useState({});
+      return <UserForm user={user} />;
+    }
+
+    class ClassUserComponent extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {};
+      }
+
+      render() {
+        return <UserForm user={this.state} />;
+      }
+    }
+
+    const userId = 1;
+
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(
-      <p>Hello world</p>
+      <React.Fragment>
+        <h1>FunctionUserComponent</h1>
+        <FunctionUserComponent userId={userId} />
+
+        <h1>ClassUserComponent</h1>
+        <ClassUserComponent userId={userId} />
+      </React.Fragment>
     );
   </script>
 </body>
