@@ -73,8 +73,31 @@
       );
     }
 
+    function fetchUser (userId) {
+      return fetch(`http://localhost:3000/users/${userId}`, {
+        method: 'GET'
+      }).then(function (response) {
+        return response.json();
+      })
+    }
+
     function FunctionUserComponent(props) {
       const [user, setUser] = React.useState({});
+
+      function fetchUserAndUpdateState() {
+        debugger
+        fetchUser(props.userId).then(setUser);
+      }
+
+      // runs when props.userId changes
+      React.useEffect(fetchUserAndUpdateState, [props.userId]);
+
+      // Runs only on first render
+      // React.useEffect(fetchUserAndUpdateState, []);
+
+      // Runs every render
+      // React.useEffect(fetchUserAndUpdateState);
+
       return <UserForm user={user} />;
     }
 
@@ -82,6 +105,11 @@
       constructor(props) {
         super(props);
         this.state = {};
+      }
+
+      componentDidMount() {
+        // debugger
+        fetchUser(this.props.userId).then(user => this.setState(user));
       }
 
       render() {
