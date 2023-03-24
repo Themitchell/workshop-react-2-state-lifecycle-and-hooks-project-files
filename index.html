@@ -73,9 +73,10 @@
       );
     }
 
-    function fetchUser (userId) {
+    function fetchUser (userId, controller=null) {
       return fetch(`http://localhost:3000/users/${userId}`, {
-        method: 'GET'
+        method: 'GET',
+        signal: (controller) ? controller.signal : null
       }).then(function (response) {
         return response.json();
       })
@@ -85,8 +86,9 @@
       const [user, setUser] = React.useState({});
 
       function fetchUserAndUpdateState() {
-        debugger
-        fetchUser(props.userId).then(setUser);
+        const controller = new AbortController();
+        fetchUser(props.userId, controller).then(setUser);
+        return controller.abort;
       }
 
       // runs when props.userId changes
@@ -105,11 +107,16 @@
       constructor(props) {
         super(props);
         this.state = {};
+        this.controller = new AbortController();
       }
 
       componentDidMount() {
-        // debugger
-        fetchUser(this.props.userId).then(user => this.setState(user));
+        fetchUser(this.props.userId, this.controller)
+          .then(user => this.setState(user));
+      }
+
+      componentWillUnmount() {
+        this.controller.abort();
       }
 
       render() {
