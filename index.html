@@ -23,6 +23,8 @@
   <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
   <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  <script src="https://unpkg.com/redux@latest/dist/redux.min.js"></script>
+  <script src="https://unpkg.com/react-redux@latest/dist/react-redux.min.js"></script>
 
   <script type="text/babel">
     function UserForm (props) {
@@ -125,14 +127,13 @@
     class ClassUserComponent extends React.Component {
       constructor(props) {
         super(props);
-        this.state = {};
         this.controller = new AbortController();
         this.handleUpdate = this.handleUpdate.bind(this);
       }
 
       componentDidMount() {
         fetchUser(this.props.userId, this.controller)
-          .then(user => this.setState(user));
+          .then(user => this.props.setUser(user));
       }
 
       componentWillUnmount() {
@@ -141,13 +142,32 @@
 
       handleUpdate(userData) {
         updateUser(this.props.userId, userData)
-          .then(user => this.setState(user));
+          .then(user => this.props.setUser(user));
       }
 
       render() {
-        return <UserForm onSubmit={this.handleUpdate} user={this.state} />;
+        return <UserForm onSubmit={this.handleUpdate} user={this.props.user} />;
       }
     }
+
+    function mapStateToProps(state) {
+      return { user: state };
+    };
+
+    function mapDispatchToProps(dispatch) {
+      return {
+        setUser: function (userData) {
+          dispatch({ type: 'set_user', payload: userData })
+        }
+      }
+    };
+
+    const UserContainer = ReactRedux.connect(
+      mapStateToProps,
+      mapDispatchToProps
+    )(ClassUserComponent);
+
+    const store = Redux.createStore(userReducer);
 
     const userId = 1;
 
@@ -157,8 +177,10 @@
         <h1>FunctionUserComponent</h1>
         <FunctionUserComponent userId={userId} />
 
-        <h1>ClassUserComponent</h1>
-        <ClassUserComponent userId={userId} />
+        <h1>UserContainer</h1>
+        <ReactRedux.Provider store={store}>
+          <UserContainer userId={userId} />
+        </ReactRedux.Provider>
       </React.Fragment>
     );
   </script>
